@@ -27,56 +27,42 @@ public class Helper {
         this.callbackURL = callbackURL;
     }
 
-    public String redirectToAuthentication() {
-    	try {
-	        OAuthService service = createService()
-	                .callback(callbackURL)
-	                .build();
+    public String redirectToAuthentication() throws Exception {
+        OAuthService service = createService()
+                .callback(callbackURL)
+                .build();
 	
-	        Token requestToken = service.getRequestToken();
+        Token requestToken = service.getRequestToken();
 	
-	        return service.getAuthorizationUrl(requestToken);
-    	} catch (Exception e) {
-    		e.printStackTrace();
-    	}
-    	return null;
+        return service.getAuthorizationUrl(requestToken);
     }
 
-    public Token redirectToApp(String oauthToken, String oauthVerifier) {
-    	try {
-	        OAuthService service = createService().build();
-	        Token requestToken = new Token(oauthToken, oauthVerifier);
-	        Verifier verifier = new Verifier(oauthVerifier);
+    public Token redirectToApp(String oauthToken, String oauthVerifier) throws Exception {
+        OAuthService service = createService().build();
+        Token requestToken = new Token(oauthToken, oauthVerifier);
+        Verifier verifier = new Verifier(oauthVerifier);
 	
-	        Token accessToken = service.getAccessToken(requestToken, verifier);
+        Token accessToken = service.getAccessToken(requestToken, verifier);
 	
-	        OAuthRequest request = new OAuthRequest(Verb.GET, PROTECTED_RESOURCE_URL, service);
-	        service.signRequest(accessToken, request);
-	        request.send();
+        OAuthRequest request = new OAuthRequest(Verb.GET, PROTECTED_RESOURCE_URL, service);
+        service.signRequest(accessToken, request);
+        request.send();
 	
-	        return accessToken;
-    	} catch (Exception e) {
-    		e.printStackTrace();
-    	}
-    	return null;
+        return accessToken;
+
     }
 
-    public int tweet(Token accessToken, String status) {
-    	try {
-	        OAuthService service = createService().build();
+    public int tweet(Token accessToken, String status) throws Exception {
+        OAuthService service = createService().build();
 	
-	        String urlEncoded = URLEncoder.encode(status, ENCODING);
-	        OAuthRequest request = new OAuthRequest(Verb.POST, PROTECTED_UPDATE_POST_URL + urlEncoded, service);
+        String urlEncoded = URLEncoder.encode(status, ENCODING);
+        OAuthRequest request = new OAuthRequest(Verb.POST, PROTECTED_UPDATE_POST_URL + urlEncoded, service);
 	
-	        request.addOAuthParameter(OAuthConstants.TOKEN, accessToken.getToken());
-	        request.addOAuthParameter(OAuthConstants.TOKEN_SECRET, accessToken.getSecret());
-	        service.signRequest(accessToken, request);
+        request.addOAuthParameter(OAuthConstants.TOKEN, accessToken.getToken());
+        request.addOAuthParameter(OAuthConstants.TOKEN_SECRET, accessToken.getSecret());
+        service.signRequest(accessToken, request);
 	
-	        return request.send().getCode();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return -1;
+        return request.send().getCode();
     }
 
     private ServiceBuilder createService() {
